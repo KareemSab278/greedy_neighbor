@@ -156,7 +156,11 @@ async fn fetch_ors_matrix(
     config: &structs::AppConfig,
     req: &structs::OrsMatrixRequest<'_>,
 ) -> Result<structs::OrsMatrixResponse, ApiError> {
-    let url = format!("{}/matrix", config.ors_base_url.trim_end_matches('/'));
+    let url = format!(
+        "{}/matrix/{}",
+        config.ors_base_url.trim_end_matches('/'),
+        req.profile
+    );
 
     let resp = config
         .client
@@ -164,7 +168,6 @@ async fn fetch_ors_matrix(
         .json(&serde_json::json!({
             "locations": req.locations,
             "metrics": req.metrics,
-            "profile": req.profile,
         }))
         .send()
         .await
