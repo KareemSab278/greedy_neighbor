@@ -1,0 +1,49 @@
+// example response from ORS api for matrix request:
+// {
+// "durations":[[0.0,404.29,682.32,762.58],[227.8,0.0,909.7,941.7],[705.32,972.21,0.0,841.13],[824.81,1099.88,853.23,0.0]],
+
+// "distances":[[0.0,1818.89,3466.02,3714.4],[1174.4,0.0,4638.68,4734.78],[3313.95,4942.2,0.0,4090.16],[3907.15,5318.78,3399.37,0.0]],
+
+// "destinations":
+//     [{"location":[-0.127598,51.50757],"name":"King Charles I Island","snapped_distance":18.88},
+//     {"location":[-0.140416,51.501286],"name":"Queens Gardens","snapped_distance":42.39},
+//     {"location":[-0.087698,51.513328],"name":"Cornhill","snapped_distance":3.12},
+//     {"location":[-0.11798,51.529971],"name":"Britannia Street","snapped_distance":3.53}],
+
+// "sources":
+//     [{"location":[-0.127598,51.50757],"name":"King Charles I Island","snapped_distance":18.88},
+//     {"location":[-0.140416,51.501286],"name":"Queens Gardens","snapped_distance":42.39},
+//     {"location":[-0.087698,51.513328],"name":"Cornhill","snapped_distance":3.12},
+//     {"location":[-0.11798,51.529971],"name":"Britannia Street","snapped_distance":3.53}],
+
+// "metadata":
+//     {"attribution":"openrouteservice.org, OpenStreetMap contributors",
+//     "service":"matrix",
+//     "timestamp":1781001150939,
+//     "query":{
+//         "locations":[[-0.1276,51.5074],[-0.141,51.5014],[-0.0877,51.5133],[-0.118,51.53]],
+//         "profile":"driving-car",
+//         "profileName":"driving-car",
+//         "responseType":"json",
+//         "metrics":["duration","distance"],
+//         "resolve_locations":true},
+//     "engine":{
+//         "version":"9.9.0",
+//         "build_date":"2026-04-29T08:25:55Z",
+//         "graph_date":"2026-06-05T09:48:24Z",
+//         "osm_date":"2026-06-04T20:21:13Z"}
+// }
+
+// need to integrate a tokio-axum api to the current
+// curl -X POST 'http://localhost:8080/ors/v2/directions/driving-car'   -H 'Content-Type: application/json'   -d '{"coordinates":[[-0.1276,51.5074],[-0.0877,51.5133]]}'
+// the api should call the ORS api to get the distance between multiple points and then a greedy nearest neighbor algorithm to find the optimal route
+//
+// api should give a round route (i.e. the first and last points should be the same)
+//
+// api should give the optimal route (i.e. the shortest route that visits all points)
+//
+// api should give the optimal route (i.e. the shortest route that visits all points) and the total distance and the time taken
+//
+// api should give most optimal route from point A (start) to point B (end) (i.e. the shortest route that visits all points from A to B like the drivers work to driver home at end of shift)
+//
+// idk how the responses should look yet lol
