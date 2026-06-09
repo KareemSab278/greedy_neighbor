@@ -35,10 +35,10 @@ async fn main() {
 
     let addr = "127.0.0.1:8081";
     let listener = TcpListener::bind(addr).await.unwrap();
+    println!("Server running at http://{}", addr);
 
     axum::serve(listener, app).await.unwrap();
 
-    println!("Server running at http://{}", addr);
 }
 
 async fn route_handler(
