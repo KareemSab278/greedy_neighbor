@@ -1,14 +1,16 @@
+mod start_ors;
 mod structs;
 use axum::{Extension, Json, Router, http::StatusCode};
 use dotenv::dotenv;
 use reqwest::Client;
+use reqwest::Method;
 use std::{env, sync::Arc};
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
-use reqwest::Method;
 
 #[tokio::main]
 async fn main() {
+    // check environment variables
     dotenv().ok().unwrap_or_else(|| {
         eprintln!("Warning: Failed to read .env file. Make sure it exists and is readable.");
         std::process::exit(1);
@@ -36,16 +38,32 @@ async fn main() {
         ors_base_url,
     });
 
+    // ORS must be running else try to start it.
+    if let Err(err_msg) = start_ors::ensure_ors_running(&config.ors_base_url).await {
+        eprintln!("Error: {}", err_msg);
+        std::process::exit(1);
+    }
+
+    println!("Successfully connected to OpenRouteService.");
+
+    // all ok, start server
     let app = Router::new()
         .route("/route", axum::routing::post(route_handler))
         .layer(Extension(config))
         .layer(cors);
 
     let addr = "127.0.0.1:6969";
-    let listener = TcpListener::bind(addr).await.unwrap();
+    let listener = TcpListener::bind(addr).await.unwrap_or_else(|err| {
+        eprintln!("Failed to bind to {}: {}", addr, err);
+        std::process::exit(1);
+    });
     println!("Server running at http://{}", addr);
 
-    axum::serve(listener, app).await.unwrap();
+    // listen and serve
+    axum::serve(listener, app).await.unwrap_or_else(|err| {
+        eprintln!("Server error: {}", err);
+        std::process::exit(1);
+    });
 }
 
 async fn route_handler(
