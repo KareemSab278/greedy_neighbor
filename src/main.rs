@@ -52,7 +52,8 @@ async fn main() {
         .layer(Extension(config))
         .layer(cors);
 
-    let addr = "127.0.0.1:6969";
+    // let addr = "127.0.0.1:6969";
+    let addr = "0.0.0.0:6969"; // Listen on all interfaces to allow access from other machines in the network
     let listener = TcpListener::bind(addr).await.unwrap_or_else(|err| {
         eprintln!("Failed to bind to {}: {}", addr, err);
         std::process::exit(1);
