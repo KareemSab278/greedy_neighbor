@@ -4,6 +4,8 @@ use dotenv::dotenv;
 use reqwest::Client;
 use std::{env, sync::Arc};
 use tokio::net::TcpListener;
+use tower_http::cors::{Any, CorsLayer};
+use reqwest::Method;
 
 #[tokio::main]
 async fn main() {
@@ -19,6 +21,11 @@ async fn main() {
         std::process::exit(1);
     });
 
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([Method::POST])
+        .allow_headers(Any);
+
     let client = Client::builder()
         .user_agent("greedy-nn-rs/0.1")
         .build()
@@ -31,14 +38,14 @@ async fn main() {
 
     let app = Router::new()
         .route("/route", axum::routing::post(route_handler))
-        .layer(Extension(config));
+        .layer(Extension(config))
+        .layer(cors);
 
-    let addr = "127.0.0.1:8081";
+    let addr = "127.0.0.1:6969";
     let listener = TcpListener::bind(addr).await.unwrap();
     println!("Server running at http://{}", addr);
 
     axum::serve(listener, app).await.unwrap();
-
 }
 
 async fn route_handler(
