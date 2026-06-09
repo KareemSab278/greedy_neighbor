@@ -19,8 +19,6 @@ async fn main() {
         std::process::exit(1);
     });
 
-    println!("Using ORS base URL: {}", ors_base_url);
-
     let client = Client::builder()
         .user_agent("greedy-nn-rs/0.1")
         .build()
@@ -39,6 +37,8 @@ async fn main() {
     let listener = TcpListener::bind(addr).await.unwrap();
 
     axum::serve(listener, app).await.unwrap();
+
+    println!("Server running at http://{}", addr);
 }
 
 async fn route_handler(
