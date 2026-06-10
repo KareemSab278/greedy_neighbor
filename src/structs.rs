@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use reqwest::Client;
 
 pub struct RouteResult {
@@ -24,6 +25,12 @@ pub struct RouteRequest {
     pub round_trip: Option<bool>,
     pub profile: Option<String>,
     pub optimization_profile: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct VroomRequest {
+    #[serde(flatten)]
+    pub payload: Value,
 }
 
 #[derive(Debug, Serialize)]

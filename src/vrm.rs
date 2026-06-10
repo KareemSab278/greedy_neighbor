@@ -1,15 +1,13 @@
+use crate::{api_err, structs};
 use reqwest::Client;
 use serde::Deserialize;
+use serde_json::Value;
 use std::process::Stdio;
 use tokio::process::Command;
 
 #[derive(Debug, Deserialize)]
 struct VrmHealthResponse {
     status: Option<String>,
-}
-
-pub fn start_vrm_server() {
-    let _ = get_vrm_env();
 }
 
 pub fn get_vrm_env() -> String {
@@ -21,6 +19,48 @@ pub fn get_vrm_env() -> String {
     });
     println!("Starting with VROOM integration enabled on {}.", vrm_base_url);
     vrm_base_url
+}
+
+pub async fn optimize_vroom(
+    config: &structs::AppConfig,
+    payload: &Value,
+) -> Result<Value, api_err::ApiError> {
+    let url = config.vrm_base_url.trim_end_matches('/');
+
+    let resp = config
+        .client
+        .post(url)
+        .json(payload)
+        .send()
+        .await
+        .map_err(|err| {
+            api_err::ApiError::internal(format!(
+                "failed to call VROOM optimize endpoint: {}",
+                err
+            ))
+        })?;
+
+    let status = resp.status();
+    let body = resp.text().await.map_err(|err| {
+        api_err::ApiError::internal(format!(
+            "failed to read VROOM response: {}",
+            err
+        ))
+    })?;
+
+    if !status.is_success() {
+        return Err(api_err::ApiError::bad_request(format!(
+            "VROOM optimize returned {}: {}",
+            status, body
+        )));
+    }
+
+    serde_json::from_str::<Value>(&body).map_err(|err| {
+        api_err::ApiError::internal(format!(
+            "failed to parse VROOM optimize JSON: {}\nbody={}",
+            err, body
+        ))
+    })
 }
 
 pub async fn ensure_vrm_running(vrm_base_url: &str) -> Result<(), String> {

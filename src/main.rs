@@ -8,7 +8,8 @@ use axum::{Extension, Json, Router, http::StatusCode};
 use dotenv::dotenv;
 use reqwest::Client;
 use reqwest::Method;
-use std::{env, sync::Arc};
+use serde_json::Value;
+use std::{sync::Arc};
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -74,17 +75,24 @@ async fn main() {
 }
 
 async fn vrm_req_handler(
-    // this fn is the main request handler for the /route endpoint and validates the input, calls vroom, and builds the response.
+    // this fn is the main request handler for the /optimize endpoint. It forwards the request to VROOM and returns the VROOM response.
     Extension(config): Extension<Arc<structs::AppConfig>>,
-    Json(payload): Json<structs::RouteRequest>,
-) -> Result<Json<structs::RouteResponse>, (StatusCode, Json<structs::ErrorResponse>)> {
-    // This is a placeholder for where you would implement the logic to call the vroom optimization endpoint instead of the ORS matrix endpoint.
-    Err((
-        StatusCode::BAD_REQUEST,
-        Json(structs::ErrorResponse {
-            error: "optimization_profile is not yet implemented".into(),
-        }),
-    ))
+    Json(payload): Json<structs::VroomRequest>,
+) -> Result<Json<Value>, (StatusCode, Json<structs::ErrorResponse>)> {
+    if !payload.payload.is_object() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(structs::ErrorResponse {
+                error: "VROOM optimize request must be a JSON object".into(),
+            }),
+        ));
+    }
+
+    let vroom_response = vrm::optimize_vroom(&config, &payload.payload).await;
+    match vroom_response {
+        Ok(value) => Ok(Json(value)),
+        Err(err) => Err(err.into_response()),
+    }
 }
 
 async fn gnn_req_handler(
