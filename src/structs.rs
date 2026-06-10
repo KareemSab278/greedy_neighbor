@@ -13,6 +13,7 @@ pub struct RouteResult {
 pub struct AppConfig {
     pub client: Client,
     pub ors_base_url: String,
+    pub vrm_base_url: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -22,6 +23,7 @@ pub struct RouteRequest {
     pub end_index: Option<usize>,
     pub round_trip: Option<bool>,
     pub profile: Option<String>,
+    pub optimization_profile: Option<bool>,
 }
 
 #[derive(Debug, Serialize)]
