@@ -4,7 +4,7 @@ This repository contains a Rust implementation of a greedy nearest neighbor algo
 
 ## Overview
 
-The program reads data, computes a path using the greedy nearest neighbor strategy, and writes the result to the configured output. It can be run directly or managed as a systemd service.
+The program reads data, computes a path using the greedy nearest neighbor strategy, and writes the result to the configured output. It can be run directly or managed as a systemd service. Routes include: :6969/gnn (for basic greedy nearest neighbor alg) and :6969/optimize (to use VROOM with ORS for more detailed routes)
 
 ## Running Locally
 
@@ -89,3 +89,4 @@ journalctl -u greedy-nn -f
 
 - Update the paths in the service file if your repository is located somewhere other than `/home/admin01/greedy_neighbor`.
 - Make sure the binary exists at `target/release/greedy-nearest-neighbor-algorithm` before starting the service.
+- Also works now with VROOM to get more accurate routes and more detailed data - not just the greedy nearest neighbor.
